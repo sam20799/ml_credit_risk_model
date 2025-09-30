@@ -32,7 +32,7 @@ Sam Finance is a comprehensive credit risk assessment platform that analyzes var
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/sam20799/ml_credit_risk_model.git
 cd sam-finance-credit-risk
 ```
 
