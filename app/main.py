@@ -1,5 +1,6 @@
 import streamlit as st
 from prediction_helper import predict  # Ensure this is correctly linked to your prediction_helper.py
+from datetime import datetime
 
 # Set the page configuration and title
 st.set_page_config(
@@ -113,6 +114,40 @@ st.markdown("""
         margin-top: 0.5rem;
     }
 
+    .insights-section {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-top: 2rem;
+    }
+
+    .insight-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .insight-title {
+        color: #667eea;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .insight-text {
+        color: #333;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0.5rem 0;
+    }
+
+    .insight-highlight {
+        color: #f5576c;
+        font-weight: 600;
+    }
+
     /* Fix for Number Input Styling */
     .stNumberInput > div > div > input {
         background-color: #f8f9fa !important;
@@ -137,17 +172,6 @@ st.markdown("""
         font-size: 15px !important;
         margin-bottom: 8px !important;
         text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
-    }tant;
-        font-size: 15px !important;
-        margin-bottom: 8px !important;
-    }
-
-    /* Complete Fix for Selectbox Styling */
-    .stSelectbox label {
-        color: #4a5568 !important;
-        font-weight: 600 !important;
-        font-size: 15px !important;
-        margin-bottom: 8px !important;
     }
 
     /* Selectbox container */
@@ -234,6 +258,73 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# Add Model Insights Section at the top
+with st.expander("📊 View Model Insights & Feature Importance", expanded=False):
+    st.markdown("""
+    <div class="insight-card">
+        <div class="insight-title">🎯 Understanding Our Credit Risk Model</div>
+        <div class="insight-text">
+            Our machine learning model analyzes <span class="insight-highlight">13 key features</span> to predict loan default probability. 
+            Below is the feature importance chart showing how each factor influences credit risk assessment.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Display the feature importance image
+    try:
+        st.image("feature_importance.png", caption="Feature Importance in Logistic Regression Model",
+                 use_container_width=True)
+    except:
+        st.warning("⚠️ Feature importance chart not found. Please ensure 'assets/feature_importance.png' exists.")
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.markdown("### 🔴 Top Risk Factors (Highest Impact)")
+        st.markdown("""
+        1. **Loan-to-Income Ratio (~17.5)** - The strongest predictor of default risk
+        2. **Credit Utilization Ratio (~16.0)** - High credit usage signals financial stress
+        3. **Delinquency Ratio (~13.5)** - Past payment behavior predicts future defaults
+        """)
+
+        st.markdown("### 🟡 Moderate Risk Factors")
+        st.markdown("""
+        - Average DPD per Delinquency (~2.0) - Severity of payment delays
+        - Rented Residence (~1.8) - Less stability than homeowners
+        - Number of Open Accounts (~1.0) - More accounts = higher risk
+        - Unsecured Loans (~0.8) - No collateral increases risk
+        """)
+
+    with col2:
+        st.markdown("### 🟢 Protective Factors (Lower Risk)")
+        st.markdown("""
+        - **Home Loans (-2.5)** - Lowest default rates
+        - **Owned Residence (-0.2)** - More financial stability
+        """)
+
+        st.markdown("### 💡 What This Means")
+        st.markdown("""
+        - Keep Loan-to-Income ratio **below 2.0**
+        - Maintain Credit Utilization **under 30%**
+        - Avoid payment delays
+        - Home loans significantly improve creditworthiness
+        """)
+
+    st.markdown("""
+    <div class="insight-card">
+        <div class="insight-title">💡 What This Means for You</div>
+        <div class="insight-text">
+            • Keep your <span class="insight-highlight">Loan-to-Income ratio below 2.0</span> for better approval chances<br>
+            • Maintain <span class="insight-highlight">Credit Utilization under 30%</span> of your total limit<br>
+            • Avoid payment delays - <span class="insight-highlight">delinquency history heavily impacts your score</span><br>
+            • Home loans and owned residences significantly improve creditworthiness<br>
+            • The model weighs recent payment behavior more than demographic factors
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
 # Personal Information Section
 st.markdown("""
 <div class="input-section">
@@ -308,7 +399,7 @@ with row4[1]:
     loan_purpose = st.selectbox('🎯 Loan Purpose', ['Education', 'Home', 'Auto', 'Personal'],
                                 help="Primary purpose of the loan")
 with row4[2]:
-    loan_type = st.selectbox('🔒 Loan Type', ['Unsecured', 'Secured'], help="Type of loan security")
+    loan_type = st.selectbox('🔐 Loan Type', ['Unsecured', 'Secured'], help="Type of loan security")
 
 # Center the button
 col1, col2, col3 = st.columns([1, 2, 1])
@@ -354,12 +445,12 @@ if calculate_risk:
     with result_col3:
         # Color coding for rating
         rating_colors = {
-            'A': '#4facfe',
-            'B': '#667eea',
-            'C': '#f093fb',
-            'D': '#f5576c'
+            'Poor': '#f5576c',
+            'Average': '#f093fb',
+            'Good': '#667eea',
+            'Excellent': '#4facfe'
         }
-        rating_color = rating_colors.get(rating[0], '#667eea')
+        rating_color = rating_colors.get(rating, '#667eea')
         st.markdown(f"""
         <div class="result-card">
             <div class="result-value" style="color: {rating_color};">⭐ {rating}</div>
@@ -369,10 +460,12 @@ if calculate_risk:
 
 # Footer
 st.markdown("---")
-st.markdown("""
+st.markdown(f"""
 <div style="text-align: center; padding: 1.5rem; color: #666;">
     <p>🎯 <strong>Sam Finance</strong> - Empowering Financial Decisions with AI</p>
     <p style="font-size: 0.9rem; opacity: 0.8;">Advanced Machine Learning Models for Precise Credit Risk Assessment</p>
-    <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.6;">© 2025 SHUBHAM KR. All rights reserved. | Developed with ❤️ using Streamlit</p>
+    <p style="font-size: 0.8rem; margin-top: 1rem; opacity: 0.6;">
+        © {datetime.now().year} SHUBHAM KR. All rights reserved. | Developed using Streamlit
+    </p>
 </div>
 """, unsafe_allow_html=True)
